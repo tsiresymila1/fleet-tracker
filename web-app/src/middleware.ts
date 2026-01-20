@@ -39,6 +39,7 @@ export async function middleware(request: NextRequest) {
     request.nextUrl.pathname !== '/' &&
     !request.nextUrl.pathname.startsWith('/privacy') &&
     !request.nextUrl.pathname.startsWith('/data-deletion') &&
+    !request.nextUrl.pathname.startsWith('/setup-complete') &&
     !request.nextUrl.pathname.startsWith('/api')
   ) {
     // no user, potentially respond by redirecting the user to the login page

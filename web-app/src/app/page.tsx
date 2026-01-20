@@ -1,7 +1,7 @@
 import { createClient } from '@/utils/supabase/server';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
-import { Truck, Shield, Zap, MapPin, BarChart3, Globe } from 'lucide-react';
+import { Truck, Shield, Zap, MapPin, BarChart3, Globe, Download } from 'lucide-react';
 import { getTranslations } from 'next-intl/server';
 
 export default async function LandingPage() {
@@ -46,7 +46,7 @@ export default async function LandingPage() {
 
       <main className="flex-1 font-outfit ">
         {/* Hero Section */}
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 px-4 overflow-hidden relative h-[calc(100vh-80px)]">
+        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48 px-4 overflow-hidden relative ">
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/20 blur-[120px] rounded-full -z-10" />
           <div className="container mx-auto">
             <div className="flex flex-col items-center space-y-8 text-center">
@@ -72,13 +72,19 @@ export default async function LandingPage() {
                     {t('home.docs')}
                   </Button>
                 </Link>
+                <Link target='_blank' href="https://github.com/tsiresymila1/fleet-tracker/releases/latest">
+                  <Button size="lg" variant="default" className="border-border text-foreground hover:bg-accent px-8 rounded-md">
+                    <Download className="ml-2 h-5 w-5 group-hover:scale-125 transition-transform" />
+                    {t('home.app')}
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
         </section>
 
         {/* Features Grid */}
-        <section id="features" className="w-full py-24 bg-card">
+        <section id="features" className="w-full pb-24">
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[

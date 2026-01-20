@@ -185,7 +185,8 @@
     "login": "Login",
     "terminal": "Terminal",
     "features": "Features",
-    "docs": "Documentation",
+    "docs": "API Documentation",
+    "app": "Download App",
     "features_tracking_title": "Real-time Tracking",
     "features_tracking_desc": "High-precision GPS updates with movement detection and status monitoring.",
     "features_no_accounts_title": "No User Accounts",
@@ -263,8 +264,11 @@
     "hero_desc": "Experience millisecond-accurate satellite tracking paired with industrial-grade data security.",
     "secure_uplink": "Secure Uplink",
     "secure_uplink_desc": "AES-256 encrypted terminal connections.",
-    "global_relay": "Global Relay",
-    "global_relay_desc": "Multi-constellation satellite coverage."
+    "global_relay": "Global Relay", 
+    "global_relay_desc": "Multi-constellation satellite coverage.",
+    "fullNamePlaceholder": "e.g. John Doe",
+    "registration_success": "Register successfully",
+    "login_success": "Login successfully"
   },
   "footer": {
     "privacy": "Privacy Policy",

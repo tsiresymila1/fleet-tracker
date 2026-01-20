@@ -186,7 +186,8 @@
     "login": "Connexion",
     "terminal": "Terminal",
     "features": "Fonctionnalités",
-    "docs": "Documentation",
+    "docs": "Documentation API",
+    "app": "Telecharger App",
     "features_tracking_title": "Suivi en Temps Réel",
     "features_tracking_desc": "Mises à jour GPS de haute précision avec détection de mouvement et surveillance de l'état.",
     "features_no_accounts_title": "Pas de Comptes Utilisateur",
@@ -265,7 +266,10 @@
     "secure_uplink": "Liaison Ascendante Sécurisée",
     "secure_uplink_desc": "Connexions de terminal cryptées AES-256.",
     "global_relay": "Relais Mondial",
-    "global_relay_desc": "Couverture satellite multi-constellations."
+    "global_relay_desc": "Couverture satellite multi-constellations.",
+    "fullNamePlaceholder": "ex. Jean Dupont",
+    "registration_success": "Enregistrement réussi! Vous pouvez maintenant vous connecter.",
+    "login_success": "Connexion réussie!"
   },
   "footer": {
     "privacy": "Politique de Confidentialité",
