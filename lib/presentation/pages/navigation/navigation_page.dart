@@ -354,9 +354,16 @@ class _NavigationPageState extends State<NavigationPage> {
                       child: Autocomplete<Map<String, dynamic>>(
                         optionsBuilder: (textEditingValue) async {
                           if (textEditingValue.text.length < 3) return [];
-                          return await _navService.searchPlaces(
-                            textEditingValue.text,
-                          );
+                          setState(() {
+                            _isLoadingRoute = true;
+                          });
+                          return await _navService
+                              .searchPlaces(textEditingValue.text)
+                              .whenComplete(() {
+                                setState(() {
+                                  _isLoadingRoute = false;
+                                });
+                              });
                         },
                         displayStringForOption: (option) =>
                             option['display_name'],
@@ -385,10 +392,10 @@ class _NavigationPageState extends State<NavigationPage> {
                                       ? const Padding(
                                           padding: EdgeInsets.all(12.0),
                                           child: SizedBox(
-                                            width: 40,
-                                            height: 40,
+                                            width: 20,
+                                            height: 20,
                                             child: CircularProgressIndicator(
-                                              strokeWidth: 1,
+                                              strokeWidth: 2,
                                             ),
                                           ),
                                         )
