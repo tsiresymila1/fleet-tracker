@@ -31,4 +31,10 @@ abstract class ApiClient {
   Future<DeviceInfoResponse> updateDeviceInfo(
     @Body() Map<String, dynamic> data,
   );
+
+  @GET('/positions')
+  Future<PositionHistoryResponse> getPositionHistory(
+    @Query('startDate') String startDate,
+    @Query('endDate') String endDate,
+  );
 }

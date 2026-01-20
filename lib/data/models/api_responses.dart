@@ -45,3 +45,46 @@ class GenericResponse {
 
   Map<String, dynamic> toJson() => _$GenericResponseToJson(this);
 }
+
+@JsonSerializable()
+class PositionHistoryResponse {
+  final bool success;
+  final List<PositionData> positions;
+
+  PositionHistoryResponse({
+    required this.success,
+    required this.positions,
+  });
+
+  factory PositionHistoryResponse.fromJson(Map<String, dynamic> json) =>
+      _$PositionHistoryResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PositionHistoryResponseToJson(this);
+}
+
+@JsonSerializable()
+class PositionData {
+  final double latitude;
+  final double longitude;
+  final double? speed;
+  final double? heading;
+  final double? altitude;
+  final String? status;
+  @JsonKey(name: 'recorded_at')
+  final String recordedAt;
+
+  PositionData({
+    required this.latitude,
+    required this.longitude,
+    this.speed,
+    this.heading,
+    this.altitude,
+    this.status,
+    required this.recordedAt,
+  });
+
+  factory PositionData.fromJson(Map<String, dynamic> json) =>
+      _$PositionDataFromJson(json);
+
+  Map<String, dynamic> toJson() => _$PositionDataToJson(this);
+}

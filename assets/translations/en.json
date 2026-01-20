@@ -49,5 +49,12 @@
   "nav_exit_message": "Are you sure you want to exit navigation mode?",
   "cancel": "Cancel",
   "stop": "Stop",
-  "exit": "Exit"
+  "exit": "Exit",
+  "retry": "Retry",
+  "history_title": "Position History",
+  "history_select_date_range": "Select Date Range",
+  "history_no_data": "No position data for this period",
+  "history_loading": "Loading history...",
+  "history_show_list": "Show List",
+  "history_show_map": "Show Map"
 }

@@ -1,11 +1,14 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../di/injection.dart';
 import '../../presentation/bloc/auth_bloc.dart';
+import '../../presentation/bloc/history_bloc.dart';
 import '../../presentation/pages/auth/registration_status_page.dart';
 import '../../presentation/pages/navigation/navigation_page.dart';
 import '../../presentation/pages/settings/settings_page.dart';
+import '../../presentation/pages/history/history_page.dart';
 
 class AppRouter {
   static final GoRouter router = GoRouter(
@@ -41,6 +44,13 @@ class AppRouter {
       GoRoute(
         path: '/settings',
         builder: (context, state) => const SettingsPage(),
+      ),
+      GoRoute(
+        path: '/history',
+        builder: (context, state) => BlocProvider(
+          create: (context) => HistoryBloc(),
+          child: const HistoryPage(),
+        ),
       ),
     ],
   );

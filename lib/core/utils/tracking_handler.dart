@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:geolocator/geolocator.dart';
@@ -19,10 +21,17 @@ class TrackingTaskHandler extends TaskHandler {
   late SharedPreferences _prefs;
   Position? _lastPosition;
   DateTime? _lastDeviceInfoSync;
+  DateTime? _lastSyncTime;
+  StreamSubscription<Position>? _positionSubscription;
+
+  // Sync interval: 30 seconds
+  static const Duration _syncInterval = Duration(seconds: 30);
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _db = AppDatabase();
+    _prefs = await SharedPreferences.getInstance();
+    
     final dio = Dio(BaseOptions(
       baseUrl: 'https://fleet-move-tracker.vercel.app/api',
       connectTimeout: const Duration(seconds: 10),
@@ -46,19 +55,34 @@ class TrackingTaskHandler extends TaskHandler {
       },
     ));
     _apiClient = ApiClient(dio);
-    _prefs = await SharedPreferences.getInstance();
+
+    // Start position stream for continuous updates
+    _startPositionStream();
   }
 
-  @override
-  Future<void> onRepeatEvent(DateTime timestamp) async {
-    try {
-      final position = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
-      );
+  /// Start listening to position stream for continuous updates
+  void _startPositionStream() {
+    const locationSettings = LocationSettings(
+      accuracy: LocationAccuracy.high,
+      distanceFilter: 5, // Only notify when moved at least 5 meters
+    );
 
-      debugPrint('Current position: $position');
+    _positionSubscription = Geolocator.getPositionStream(
+      locationSettings: locationSettings,
+    ).listen(
+      _onPositionUpdate,
+      onError: (error) {
+        debugPrint('Position stream error: $error');
+      },
+    );
+
+    debugPrint('Position stream started');
+  }
+
+  /// Handle each position update from the stream
+  Future<void> _onPositionUpdate(Position position) async {
+    try {
+      debugPrint('Stream position: ${position.latitude}, ${position.longitude}');
 
       // Save locally if enough distance moved
       if (_shouldSave(position)) {
@@ -66,18 +90,35 @@ class TrackingTaskHandler extends TaskHandler {
         _lastPosition = position;
       }
 
-      // Sync pending positions (including the one just saved)
-      await _syncPendingPositions();
+      // Update notification immediately with latest position
+      _updateNotification(position);
+    } catch (e) {
+      debugPrint('Error processing stream position: $e');
+    }
+  }
+
+  @override
+  Future<void> onRepeatEvent(DateTime timestamp) async {
+    try {
+      // Only sync to API every 30 seconds to limit API calls
+      if (_shouldSync()) {
+        await _syncPendingPositions();
+        _lastSyncTime = DateTime.now();
+      }
 
       // Sync device info periodically (e.g., every 5 minutes)
       if (_shouldSyncDeviceInfo()) {
         await _syncDeviceInfo();
       }
-
-      _updateNotification(position);
     } catch (e) {
-      // Handle tracking error silently in background
+      debugPrint('Error in repeat event: $e');
     }
+  }
+
+  /// Check if enough time has passed since last sync (30 seconds)
+  bool _shouldSync() {
+    if (_lastSyncTime == null) return true;
+    return DateTime.now().difference(_lastSyncTime!) >= _syncInterval;
   }
 
   bool _shouldSave(Position current) {
@@ -187,6 +228,10 @@ class TrackingTaskHandler extends TaskHandler {
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
+    // Cancel position stream subscription
+    await _positionSubscription?.cancel();
+    _positionSubscription = null;
+    
     await _db.close();
   }
 }

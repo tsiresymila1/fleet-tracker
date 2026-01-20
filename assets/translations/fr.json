@@ -49,5 +49,12 @@
   "nav_exit_message": "Êtes-vous sûr de vouloir quitter le mode navigation ?",
   "cancel": "Annuler",
   "stop": "Arrêter",
-  "exit": "Quitter"
+  "exit": "Quitter",
+  "retry": "Réessayer",
+  "history_title": "Historique des Positions",
+  "history_select_date_range": "Sélectionner la période",
+  "history_no_data": "Aucune donnée pour cette période",
+  "history_loading": "Chargement de l'historique...",
+  "history_show_list": "Afficher la liste",
+  "history_show_map": "Afficher la carte"
 }
