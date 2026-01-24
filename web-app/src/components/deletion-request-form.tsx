@@ -63,7 +63,7 @@ export function DeletionRequestForm() {
       <Button 
         type="submit" 
         disabled={loading}
-        className="w-full bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold py-6 rounded-xl"
+        className="w-full bg-destructive hover:bg-destructive/90 text-white font-bold py-6 rounded-xl"
       >
         {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : t('submit')}
       </Button>

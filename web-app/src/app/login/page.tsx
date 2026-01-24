@@ -6,11 +6,12 @@ import { createClient } from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Truck, Mail, Lock, Loader2, ShieldCheck, Globe, Zap, User } from 'lucide-react'
+import { Truck, Mail, Lock, Loader2, Zap, User } from 'lucide-react'
 import { toast } from 'sonner'
 import Link from 'next/link'
 import { AuthError } from '@supabase/supabase-js'
 import { useTranslations } from 'next-intl';
+import { ThemeToggle } from '@/components/theme-toggle'
 
 export default function LoginPage() {
   const t = useTranslations('auth');
@@ -60,40 +61,32 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex bg-background font-outfit text-foreground">
-      {/* Left Side: Branding and Visuals */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-between p-12 lg:p-20 bg-zinc-950 border-r border-border">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-transparent to-blue-600/10 z-0" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 blur-[132px] rounded-full z-0" />
+      <div className="absolute top-4 right-4 z-50">
+        <ThemeToggle />
+      </div>
+      {/* Left Side: Minimalist Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden flex-col justify-center p-20 bg-zinc-50 dark:bg-zinc-950 border-r border-border transition-colors duration-500">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(var(--primary-rgb),0.1),transparent)] z-0" />
         
-        <div className="relative z-10">
-          <Link className="flex items-center gap-3" href="/">
-            <div className="bg-primary p-2.5 rounded-xl shadow-lg shadow-primary/20">
-              <Truck className="h-6 w-6 text-primary-foreground" />
+        <div className="relative z-10 max-w-lg mx-auto text-center space-y-8">
+          <Link className="flex items-center justify-center gap-4 mb-12" href="/">
+            <div className="bg-primary p-3 rounded-2xl shadow-2xl shadow-primary/20">
+              <Truck className="h-8 w-8 text-primary-foreground" />
             </div>
-            <span className="font-bold text-3xl tracking-tighter text-white">FleetTrack</span>
+            <span className="font-bold text-4xl tracking-tighter text-foreground">FleetTrack</span>
           </Link>
           
-          <div className="mt-24 space-y-6">
-            <h1 className="text-5xl lg:text-7xl font-bold tracking-tighter leading-[1.1] text-white" dangerouslySetInnerHTML={{ __html: t.raw('hero_title') }} />
-            <p className="text-xl text-zinc-400 max-w-lg leading-relaxed">
-              {t('hero_desc')}
-            </p>
-          </div>
-        </div>
-
-        <div className="relative z-10 grid grid-cols-2 gap-8">
-          <div className="space-y-4">
-            <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-2xl">
-              <ShieldCheck className="h-6 w-6 text-primary mb-2" />
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">{t('secure_uplink')}</h3>
-              <p className="text-zinc-500 text-xs mt-1">{t('secure_uplink_desc')}</p>
+          <h1 className="text-5xl lg:text-6xl font-bold tracking-tighter leading-tight text-foreground" dangerouslySetInnerHTML={{ __html: t.raw('hero_title') }} />
+          <p className="text-xl text-zinc-400 leading-relaxed">
+            {t('hero_desc')}
+          </p>
+          
+          <div className="pt-12 grid grid-cols-2 gap-4 opacity-50">
+            <div className="px-4 py-2 border border-zinc-800 rounded-full text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+              {t('secure_uplink')}
             </div>
-          </div>
-          <div className="space-y-4">
-            <div className="bg-zinc-900/50 backdrop-blur-md border border-zinc-800 p-4 rounded-2xl">
-              <Globe className="h-6 w-6 text-blue-500 mb-2" />
-              <h3 className="font-bold text-white uppercase text-xs tracking-widest">{t('global_relay')}</h3>
-              <p className="text-zinc-500 text-xs mt-1">{t('global_relay_desc')}</p>
+            <div className="px-4 py-2 border border-zinc-800 rounded-full text-[10px] text-zinc-500 uppercase tracking-widest font-bold">
+              {t('global_relay')}
             </div>
           </div>
         </div>
@@ -129,7 +122,7 @@ export default function LoginPage() {
               <div className="space-y-4">
                 {isSignUp && (
                   <div className="space-y-2">
-                    <Label htmlFor="name" className="text-muted-foreground text-xs font-bold uppercase tracking-wider">{t('full_name')}</Label>
+                    <Label htmlFor="name" className="text-foreground text-xs font-bold uppercase tracking-wider">{t('full_name')}</Label>
                     <div className="relative group">
                       <User className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                       <Input 

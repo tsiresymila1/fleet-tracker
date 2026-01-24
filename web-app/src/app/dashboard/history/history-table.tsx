@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { DatePicker } from "@/components/ui/date-picker";
 import { TrajectoryView } from "@/components/trajectory-view";
+import { PurgeDataDialog } from "@/components/purge-data-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { 
   Filter,
@@ -20,6 +21,7 @@ import {
     Map as MapIconLucide,
     Download as DownloadIcon,
     RefreshCw as RefreshIcon,
+    Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
 import { 
@@ -67,6 +69,7 @@ export function HistoryTable({ initialData, currentPage, totalPages, totalCount 
   const [endDate, setEndDate] = useState<Date | undefined>(getCurrentMonthEnd());
   const [selectedDevice, setSelectedDevice] = useState<string>("all");
   const [showTrajectory, setShowTrajectory] = useState(false);
+  const [showPurgeDialog, setShowPurgeDialog] = useState(false);
   
   // Update historyData when initialData changes (after refresh)
   useEffect(() => {
@@ -271,6 +274,13 @@ export function HistoryTable({ initialData, currentPage, totalPages, totalCount 
           >
             <MapIconLucide className="mr-2 h-4 w-4" /> {t('history.trajectory')}
           </Button>
+          <Button 
+            variant="destructive"
+            className=""
+            onClick={() => setShowPurgeDialog(true)}
+          >
+            <Trash2 className="mr-2 h-4 w-4" /> {t('history.purge')}
+          </Button>
       </div>
 
       <Card className="border-border bg-card/50 backdrop-blur-md">
@@ -321,6 +331,13 @@ export function HistoryTable({ initialData, currentPage, totalPages, totalCount 
         points={trajectoryPoints}
         availableDevices={availableDevices}
         selectedDeviceFilter={selectedDevice}
+      />
+
+      <PurgeDataDialog
+        open={showPurgeDialog}
+        onOpenChange={setShowPurgeDialog}
+        availableDevices={availableDevices}
+        onPurgeComplete={handleRefresh}
       />
 
       <div className="rounded-2xl border border-border bg-card/50 backdrop-blur-md overflow-hidden shadow-sm">

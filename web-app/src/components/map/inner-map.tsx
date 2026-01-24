@@ -47,6 +47,17 @@ function MapController({ onMapReady }: { onMapReady: (map: L.Map) => void }) {
   
   useEffect(() => {
     onMapReady(map);
+    
+    // Handle window resize to update map size
+    const handleResize = () => {
+      map.invalidateSize();
+    };
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
   }, [map, onMapReady]);
 
   return null;
@@ -120,7 +131,7 @@ const InnerMap = forwardRef<{ centerMap: (lat: number, lng: number) => void }, I
           zoom={zoom} 
           scrollWheelZoom={true} 
           className="h-full w-full bg-zinc-950"
-          style={{ zIndex: 0 }}
+          style={{ zIndex: 0, minHeight: '600px' }}
         >
           <MapController onMapReady={handleMapReady} />
           <TileLayer

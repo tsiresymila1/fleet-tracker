@@ -46,7 +46,7 @@ export function LogoutButton() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
-          <AlertDialogAction onClick={handleLogout} className="bg-destructive hover:bg-destructive/90 text-destructive-foreground border-destructive">
+          <AlertDialogAction onClick={handleLogout} className="bg-destructive hover:bg-destructive/90 text-white border-destructive">
             {t('logout')}
           </AlertDialogAction>
         </AlertDialogFooter>

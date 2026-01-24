@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 import { Toaster } from "sonner";
 
 import { ThemeProvider } from "@/components/theme-provider";
+import ProgressBarProvider from "@/components/progress-bar-provider";
 
 export default async function RootLayout({
   children,
@@ -38,7 +39,9 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={messages} locale={locale}>
-            {children}
+            <ProgressBarProvider>
+              {children}
+            </ProgressBarProvider>
             <Toaster position="top-right" richColors theme="dark" />
           </NextIntlClientProvider>
         </ThemeProvider>

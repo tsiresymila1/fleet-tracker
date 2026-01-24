@@ -56,5 +56,6 @@
   "history_no_data": "No position data for this period",
   "history_loading": "Loading history...",
   "history_show_list": "Show List",
-  "history_show_map": "Show Map"
+  "history_show_map": "Show Map",
+  "current_speed": "Current Speed"
 }

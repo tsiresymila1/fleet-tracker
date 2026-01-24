@@ -119,7 +119,7 @@ class FleetMap extends StatelessWidget {
             transform: Matrix4.identity()
               ..setEntry(3, 2, 0.001)
               ..rotateX(value)
-              ..scale(1.0 + (value.abs() * 1.5), 1.0 + (value.abs() * 1.5), 1.0 + (value.abs() * 1.5)), // Scale up significantly to fill screen voids
+              ..scale(1.0 + (value.abs() * 1.5), 1.0 + (value.abs() * 1.5), 1.0 + (value.abs() * 1.5)), 
             child: child,
           ),
         );

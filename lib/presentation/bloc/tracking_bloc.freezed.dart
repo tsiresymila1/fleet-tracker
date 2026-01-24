@@ -12,17 +12,11 @@ part of 'tracking_bloc.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$TrackingEvent implements DiagnosticableTreeMixin {
+mixin _$TrackingEvent {
 
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingEvent'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -34,7 +28,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingEvent()';
 }
 
@@ -61,14 +55,16 @@ extension TrackingEventPatterns on TrackingEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( TrackingStart value)?  start,TResult Function( TrackingStop value)?  stop,TResult Function( TrackingToggle value)?  toggle,TResult Function( TrackingPositionUpdated value)?  positionUpdated,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( TrackingStart value)?  start,TResult Function( TrackingStop value)?  stop,TResult Function( TrackingToggle value)?  toggle,TResult Function( TrackingPositionUpdated value)?  positionUpdated,TResult Function( TrackingAppResumed value)?  appResumed,TResult Function( TrackingAppPaused value)?  appPaused,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case TrackingStart() when start != null:
 return start(_that);case TrackingStop() when stop != null:
 return stop(_that);case TrackingToggle() when toggle != null:
 return toggle(_that);case TrackingPositionUpdated() when positionUpdated != null:
-return positionUpdated(_that);case _:
+return positionUpdated(_that);case TrackingAppResumed() when appResumed != null:
+return appResumed(_that);case TrackingAppPaused() when appPaused != null:
+return appPaused(_that);case _:
   return orElse();
 
 }
@@ -86,14 +82,16 @@ return positionUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( TrackingStart value)  start,required TResult Function( TrackingStop value)  stop,required TResult Function( TrackingToggle value)  toggle,required TResult Function( TrackingPositionUpdated value)  positionUpdated,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( TrackingStart value)  start,required TResult Function( TrackingStop value)  stop,required TResult Function( TrackingToggle value)  toggle,required TResult Function( TrackingPositionUpdated value)  positionUpdated,required TResult Function( TrackingAppResumed value)  appResumed,required TResult Function( TrackingAppPaused value)  appPaused,}){
 final _that = this;
 switch (_that) {
 case TrackingStart():
 return start(_that);case TrackingStop():
 return stop(_that);case TrackingToggle():
 return toggle(_that);case TrackingPositionUpdated():
-return positionUpdated(_that);case _:
+return positionUpdated(_that);case TrackingAppResumed():
+return appResumed(_that);case TrackingAppPaused():
+return appPaused(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -110,14 +108,16 @@ return positionUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( TrackingStart value)?  start,TResult? Function( TrackingStop value)?  stop,TResult? Function( TrackingToggle value)?  toggle,TResult? Function( TrackingPositionUpdated value)?  positionUpdated,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( TrackingStart value)?  start,TResult? Function( TrackingStop value)?  stop,TResult? Function( TrackingToggle value)?  toggle,TResult? Function( TrackingPositionUpdated value)?  positionUpdated,TResult? Function( TrackingAppResumed value)?  appResumed,TResult? Function( TrackingAppPaused value)?  appPaused,}){
 final _that = this;
 switch (_that) {
 case TrackingStart() when start != null:
 return start(_that);case TrackingStop() when stop != null:
 return stop(_that);case TrackingToggle() when toggle != null:
 return toggle(_that);case TrackingPositionUpdated() when positionUpdated != null:
-return positionUpdated(_that);case _:
+return positionUpdated(_that);case TrackingAppResumed() when appResumed != null:
+return appResumed(_that);case TrackingAppPaused() when appPaused != null:
+return appPaused(_that);case _:
   return null;
 
 }
@@ -134,13 +134,15 @@ return positionUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  start,TResult Function()?  stop,TResult Function()?  toggle,TResult Function( Position position)?  positionUpdated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  start,TResult Function()?  stop,TResult Function()?  toggle,TResult Function( Position position)?  positionUpdated,TResult Function()?  appResumed,TResult Function()?  appPaused,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case TrackingStart() when start != null:
 return start();case TrackingStop() when stop != null:
 return stop();case TrackingToggle() when toggle != null:
 return toggle();case TrackingPositionUpdated() when positionUpdated != null:
-return positionUpdated(_that.position);case _:
+return positionUpdated(_that.position);case TrackingAppResumed() when appResumed != null:
+return appResumed();case TrackingAppPaused() when appPaused != null:
+return appPaused();case _:
   return orElse();
 
 }
@@ -158,13 +160,15 @@ return positionUpdated(_that.position);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  start,required TResult Function()  stop,required TResult Function()  toggle,required TResult Function( Position position)  positionUpdated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  start,required TResult Function()  stop,required TResult Function()  toggle,required TResult Function( Position position)  positionUpdated,required TResult Function()  appResumed,required TResult Function()  appPaused,}) {final _that = this;
 switch (_that) {
 case TrackingStart():
 return start();case TrackingStop():
 return stop();case TrackingToggle():
 return toggle();case TrackingPositionUpdated():
-return positionUpdated(_that.position);case _:
+return positionUpdated(_that.position);case TrackingAppResumed():
+return appResumed();case TrackingAppPaused():
+return appPaused();case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -181,13 +185,15 @@ return positionUpdated(_that.position);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  start,TResult? Function()?  stop,TResult? Function()?  toggle,TResult? Function( Position position)?  positionUpdated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  start,TResult? Function()?  stop,TResult? Function()?  toggle,TResult? Function( Position position)?  positionUpdated,TResult? Function()?  appResumed,TResult? Function()?  appPaused,}) {final _that = this;
 switch (_that) {
 case TrackingStart() when start != null:
 return start();case TrackingStop() when stop != null:
 return stop();case TrackingToggle() when toggle != null:
 return toggle();case TrackingPositionUpdated() when positionUpdated != null:
-return positionUpdated(_that.position);case _:
+return positionUpdated(_that.position);case TrackingAppResumed() when appResumed != null:
+return appResumed();case TrackingAppPaused() when appPaused != null:
+return appPaused();case _:
   return null;
 
 }
@@ -198,7 +204,7 @@ return positionUpdated(_that.position);case _:
 /// @nodoc
 
 
-class TrackingStart with DiagnosticableTreeMixin implements TrackingEvent {
+class TrackingStart implements TrackingEvent {
   const TrackingStart();
   
 
@@ -206,12 +212,6 @@ class TrackingStart with DiagnosticableTreeMixin implements TrackingEvent {
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingEvent.start'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -223,7 +223,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingEvent.start()';
 }
 
@@ -236,7 +236,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class TrackingStop with DiagnosticableTreeMixin implements TrackingEvent {
+class TrackingStop implements TrackingEvent {
   const TrackingStop();
   
 
@@ -244,12 +244,6 @@ class TrackingStop with DiagnosticableTreeMixin implements TrackingEvent {
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingEvent.stop'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -261,7 +255,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingEvent.stop()';
 }
 
@@ -274,7 +268,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class TrackingToggle with DiagnosticableTreeMixin implements TrackingEvent {
+class TrackingToggle implements TrackingEvent {
   const TrackingToggle();
   
 
@@ -282,12 +276,6 @@ class TrackingToggle with DiagnosticableTreeMixin implements TrackingEvent {
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingEvent.toggle'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -299,7 +287,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingEvent.toggle()';
 }
 
@@ -312,7 +300,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class TrackingPositionUpdated with DiagnosticableTreeMixin implements TrackingEvent {
+class TrackingPositionUpdated implements TrackingEvent {
   const TrackingPositionUpdated(this.position);
   
 
@@ -325,12 +313,6 @@ class TrackingPositionUpdated with DiagnosticableTreeMixin implements TrackingEv
 $TrackingPositionUpdatedCopyWith<TrackingPositionUpdated> get copyWith => _$TrackingPositionUpdatedCopyWithImpl<TrackingPositionUpdated>(this, _$identity);
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingEvent.positionUpdated'))
-    ..add(DiagnosticsProperty('position', position));
-}
 
 @override
 bool operator ==(Object other) {
@@ -342,7 +324,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,position);
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingEvent.positionUpdated(position: $position)';
 }
 
@@ -382,17 +364,75 @@ as Position,
 }
 
 /// @nodoc
-mixin _$TrackingState implements DiagnosticableTreeMixin {
+
+
+class TrackingAppResumed implements TrackingEvent {
+  const TrackingAppResumed();
+  
+
+
 
 
 
 
 @override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingState'))
-    ;
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackingAppResumed);
 }
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'TrackingEvent.appResumed()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class TrackingAppPaused implements TrackingEvent {
+  const TrackingAppPaused();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TrackingAppPaused);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'TrackingEvent.appPaused()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+mixin _$TrackingState {
+
+
+
+
 
 @override
 bool operator ==(Object other) {
@@ -404,7 +444,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingState()';
 }
 
@@ -568,7 +608,7 @@ return error(_that.message);case _:
 /// @nodoc
 
 
-class TrackingInitial with DiagnosticableTreeMixin implements TrackingState {
+class TrackingInitial implements TrackingState {
   const TrackingInitial();
   
 
@@ -576,12 +616,6 @@ class TrackingInitial with DiagnosticableTreeMixin implements TrackingState {
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingState.initial'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -593,7 +627,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingState.initial()';
 }
 
@@ -606,7 +640,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class TrackingLoading with DiagnosticableTreeMixin implements TrackingState {
+class TrackingLoading implements TrackingState {
   const TrackingLoading();
   
 
@@ -614,12 +648,6 @@ class TrackingLoading with DiagnosticableTreeMixin implements TrackingState {
 
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingState.loading'))
-    ;
-}
 
 @override
 bool operator ==(Object other) {
@@ -631,7 +659,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingState.loading()';
 }
 
@@ -644,7 +672,7 @@ String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
 /// @nodoc
 
 
-class TrackingActive with DiagnosticableTreeMixin implements TrackingState {
+class TrackingActive implements TrackingState {
   const TrackingActive(this.currentPosition);
   
 
@@ -657,12 +685,6 @@ class TrackingActive with DiagnosticableTreeMixin implements TrackingState {
 $TrackingActiveCopyWith<TrackingActive> get copyWith => _$TrackingActiveCopyWithImpl<TrackingActive>(this, _$identity);
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingState.active'))
-    ..add(DiagnosticsProperty('currentPosition', currentPosition));
-}
 
 @override
 bool operator ==(Object other) {
@@ -674,7 +696,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,currentPosition);
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingState.active(currentPosition: $currentPosition)';
 }
 
@@ -716,7 +738,7 @@ as Position,
 /// @nodoc
 
 
-class TrackingError with DiagnosticableTreeMixin implements TrackingState {
+class TrackingError implements TrackingState {
   const TrackingError(this.message);
   
 
@@ -729,12 +751,6 @@ class TrackingError with DiagnosticableTreeMixin implements TrackingState {
 $TrackingErrorCopyWith<TrackingError> get copyWith => _$TrackingErrorCopyWithImpl<TrackingError>(this, _$identity);
 
 
-@override
-void debugFillProperties(DiagnosticPropertiesBuilder properties) {
-  properties
-    ..add(DiagnosticsProperty('type', 'TrackingState.error'))
-    ..add(DiagnosticsProperty('message', message));
-}
 
 @override
 bool operator ==(Object other) {
@@ -746,7 +762,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,message);
 
 @override
-String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
+String toString() {
   return 'TrackingState.error(message: $message)';
 }
 

@@ -53,8 +53,8 @@ export default async function DataDeletionPage() {
                 {t('deletion.auto_desc')}
               </p>
               
-              <div className="bg-primary/50 p-4 rounded-lg border border-border mt-6">
-                <p className="text-sm text-secondary-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: t.raw('deletion.auto_text') }} />
+              <div className="dark:bg-primary/20 bg-primary/10 p-4 rounded-lg border border-border mt-6">
+                <p className="text-sm text-foreground leading-relaxed" dangerouslySetInnerHTML={{ __html: t.raw('deletion.auto_text') }} />
               </div>
             </div>
           </div>

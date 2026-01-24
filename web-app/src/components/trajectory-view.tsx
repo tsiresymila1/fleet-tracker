@@ -7,6 +7,8 @@ import L from "leaflet";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { Maximize2, Minimize2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface TrajectoryPoint {
   latitude: number;
@@ -38,7 +40,7 @@ const DEVICE_COLORS = [
   "#6366f1", // indigo
 ];
 
-function MapBounds({ points }: { points: TrajectoryPoint[] }) {
+function MapBounds({ points, isFullscreen }: { points: TrajectoryPoint[], isFullscreen: boolean }) {
   const map = useMap();
 
   useEffect(() => {
@@ -47,6 +49,27 @@ function MapBounds({ points }: { points: TrajectoryPoint[] }) {
     const bounds = points.map(p => [p.latitude, p.longitude] as [number, number]);
     map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
   }, [map, points]);
+  
+  // Handle window resize and fullscreen toggle
+  useEffect(() => {
+    const handleResize = () => {
+      map.invalidateSize();
+      // Re-fit bounds after resize
+      if (points.length > 0) {
+        const bounds = points.map(p => [p.latitude, p.longitude] as [number, number]);
+        map.fitBounds(bounds, { padding: [50, 50], maxZoom: 15 });
+      }
+    };
+    
+    // Trigger resize when fullscreen changes
+    setTimeout(handleResize, 100);
+    
+    window.addEventListener('resize', handleResize);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [map, points, isFullscreen]);
 
   return null;
 }
@@ -73,6 +96,8 @@ function groupPointsByDevice(points: TrajectoryPoint[]): Map<string, TrajectoryP
 
 export function TrajectoryView({ open, onOpenChange, points, availableDevices = [], selectedDeviceFilter = "all" }: TrajectoryViewProps) {
   const [selectedDevices, setSelectedDevices] = useState<string[]>([]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const t = useTranslations('history');
   
   useEffect(() => {
     // Fix default icon issues with Next.js
@@ -88,11 +113,14 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
   // Initialize selected devices when dialog opens
   useEffect(() => {
     if (open) {
-      if (selectedDeviceFilter === "all") {
-        setSelectedDevices(availableDevices.length > 0 ? availableDevices : Array.from(new Set(points.map(p => p.device || 'Unknown'))));
-      } else {
-        setSelectedDevices([selectedDeviceFilter]);
-      }
+      const initial = selectedDeviceFilter === "all"
+        ? (availableDevices.length > 0 ? availableDevices : Array.from(new Set(points.map(p => p.device || 'Unknown'))))
+        : [selectedDeviceFilter];
+      
+      const timer = setTimeout(() => {
+        setSelectedDevices(initial);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [open, selectedDeviceFilter, availableDevices, points]);
 
@@ -113,7 +141,7 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
   }, [selectedDevices, groupedPoints]);
 
   // Get device color
-  const getDeviceColor = (device: string, index: number): string => {
+  const getDeviceColor = (device: string): string => {
     const deviceIndex = Array.from(groupedPoints.keys()).indexOf(device);
     return DEVICE_COLORS[deviceIndex % DEVICE_COLORS.length];
   };
@@ -121,11 +149,11 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
   if (points.length === 0) {
     return (
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-4xl">
+        <DialogContent className="min-w-4xl">
           <DialogHeader>
-            <DialogTitle>Device Trajectory</DialogTitle>
+            <DialogTitle>{t('trajectory_title')}</DialogTitle>
             <DialogDescription>
-              No trajectory data available for the selected time range.
+              {t('trajectory_no_data')}
             </DialogDescription>
           </DialogHeader>
         </DialogContent>
@@ -142,20 +170,30 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="min-w-6xl h-[80vh] p-0">
-        <DialogHeader className="px-6 pt-6">
-          <DialogTitle>Device Trajectory</DialogTitle>
-          <DialogDescription>
-            {filteredPoints.length > 0 && (
-              <>
-                {filteredPoints.length} points • {new Date(filteredPoints[0].recorded_at).toLocaleString()} to {new Date(filteredPoints[filteredPoints.length - 1].recorded_at).toLocaleString()}
-              </>
-            )}
-          </DialogDescription>
+      <DialogContent className={`${isFullscreen ? 'max-w-none min-w-screen min-h-screen m-0 rounded-none' : 'min-w-[90vw] w-full h-[85vh]'} p-0 transition-all duration-300 overflow-hidden flex flex-col`}>
+        <DialogHeader className="px-6 pt-6 flex flex-row items-center justify-between space-y-0">
+          <div className="space-y-1">
+            <DialogTitle>{t('trajectory_title')}</DialogTitle>
+            <DialogDescription>
+              {filteredPoints.length > 0 && (
+                <>
+                  {filteredPoints.length} {t('trajectory_points')} • {new Date(filteredPoints[0].recorded_at).toLocaleString()} {t('to_range')} {new Date(filteredPoints[filteredPoints.length - 1].recorded_at).toLocaleString()}
+                </>
+              )}
+            </DialogDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            onClick={() => setIsFullscreen(!isFullscreen)}
+            className="mr-6"
+          >
+            {isFullscreen ? <Minimize2 className="h-4 w-4" /> : <Maximize2 className="h-4 w-4" />}
+          </Button>
         </DialogHeader>
         <div className="px-6 pb-4 space-y-3 border-b border-border">
           <div className="flex items-center gap-4 flex-wrap">
-            <Label className="text-sm font-semibold whitespace-nowrap">Show Devices:</Label>
+            <Label className="text-sm font-semibold whitespace-nowrap">{t('trajectory_show_devices')}</Label>
             <div className="flex items-center gap-2">
               <Button
                 variant={selectedDevices.length === allDevices.length ? "default" : "outline"}
@@ -163,7 +201,7 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
                 onClick={() => setSelectedDevices(allDevices)}
                 className="h-8 text-xs"
               >
-                All ({allDevices.length})
+                {t('trajectory_all')} ({allDevices.length})
               </Button>
               {allDevices.map((device) => {
                 const isSelected = selectedDevices.includes(device);
@@ -181,14 +219,14 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
                     }}
                     className="h-8 text-xs flex items-center gap-1.5"
                     style={isSelected ? { 
-                      backgroundColor: getDeviceColor(device, 0),
-                      borderColor: getDeviceColor(device, 0),
+                      backgroundColor: getDeviceColor(device),
+                      borderColor: getDeviceColor(device),
                       color: 'white'
                     } : {}}
                   >
                     <div 
                       className="w-2 h-2 rounded-full" 
-                      style={{ backgroundColor: isSelected ? 'white' : getDeviceColor(device, 0) }}
+                      style={{ backgroundColor: isSelected ? 'white' : getDeviceColor(device) }}
                     />
                     {device} ({(groupedPoints.get(device) || []).length})
                   </Button>
@@ -202,23 +240,23 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
             center={center} 
             zoom={13} 
             scrollWheelZoom={true} 
-            className="h-full w-full rounded-lg"
-            style={{ minHeight: '500px' }}
+            className={`w-full rounded-lg ${isFullscreen ? 'h-full' : 'h-full'}`}
+            style={{ minHeight: isFullscreen ? 'calc(100vh - 200px)' : '900px' }}
           >
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             
-            <MapBounds points={filteredPoints.length > 0 ? filteredPoints : points} />
+            <MapBounds points={filteredPoints.length > 0 ? filteredPoints : points} isFullscreen={isFullscreen} />
             
             {/* Render polylines for each selected device */}
-            {selectedDevices.map((device, deviceIndex) => {
+            {selectedDevices.map((device) => {
               const devicePoints = groupedPoints.get(device) || [];
               if (devicePoints.length < 2) return null;
               
               const polylinePositions = devicePoints.map(p => [p.latitude, p.longitude] as [number, number]);
-              const color = getDeviceColor(device, deviceIndex);
+              const color = getDeviceColor(device);
               const startPoint = devicePoints[0];
               const endPoint = devicePoints[devicePoints.length - 1];
               
@@ -247,9 +285,9 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
                     <Marker position={[startPoint.latitude, startPoint.longitude]} icon={startIcon}>
                       <Popup>
                         <div className="text-zinc-900">
-                          <h3 className="font-bold">{device} - Start</h3>
+                          <h3 className="font-bold">{device} - {t('trajectory_start')}</h3>
                           <p className="text-xs">{new Date(startPoint.recorded_at).toLocaleString()}</p>
-                          <p className="text-xs">Speed: {startPoint.speed} km/h</p>
+                          <p className="text-xs">{t('trajectory_speed')}: {startPoint.speed} km/h</p>
                         </div>
                       </Popup>
                     </Marker>
@@ -258,9 +296,9 @@ export function TrajectoryView({ open, onOpenChange, points, availableDevices = 
                     <Marker position={[endPoint.latitude, endPoint.longitude]} icon={endIcon}>
                       <Popup>
                         <div className="text-zinc-900">
-                          <h3 className="font-bold">{device} - End</h3>
+                          <h3 className="font-bold">{device} - {t('trajectory_end')}</h3>
                           <p className="text-xs">{new Date(endPoint.recorded_at).toLocaleString()}</p>
-                          <p className="text-xs">Speed: {endPoint.speed} km/h</p>
+                          <p className="text-xs">{t('trajectory_speed')}: {endPoint.speed} km/h</p>
                         </div>
                       </Popup>
                     </Marker>

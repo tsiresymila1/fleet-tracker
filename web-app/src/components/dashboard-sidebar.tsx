@@ -22,6 +22,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { createClient } from '@/utils/supabase/client';
 import { User as SupabaseUser } from '@supabase/supabase-js';
@@ -57,6 +58,8 @@ export function DashboardSidebar() {
   const supabase = createClient();
   const t = useTranslations();
   const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  const { setOpenMobile } = useSidebar();
 
   useEffect(() => {
     const getUser = async () => {
@@ -108,7 +111,7 @@ export function DashboardSidebar() {
                           : 'text-zinc-700 dark:text-zinc-300 hover:text-primary hover:bg-primary/10 dark:hover:text-zinc-100 dark:hover:bg-primary/10'}
                       `}
                     >
-                      <Link href={item.url}>
+                      <Link href={item.url} onClick={() => setOpenMobile(false)}>
                         <item.icon className={`w-5 h-5 ${isActive ? 'text-primary' : 'text-zinc-500'}`} />
                         <span>{t(item.key)}</span>
                       </Link>
