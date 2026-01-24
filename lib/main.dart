@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:form_builder_validators/localization/l10n.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:hydrated_bloc/hydrated_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 
@@ -36,6 +37,24 @@ void main() async {
     }
   } catch (e) {
     debugPrint('Permission request error: $e');
+  }
+
+  // Request notification permission for Android 13+ at app startup
+  try {
+    debugPrint('📱 Requesting notification permission at startup...');
+    final notifPermission = await FlutterForegroundTask.requestNotificationPermission();
+    debugPrint('   Notification permission: $notifPermission');
+  } catch (e) {
+    debugPrint('Notification permission request error: $e');
+  }
+
+  // Request battery optimization exemption at app startup
+  try {
+    debugPrint('🔋 Requesting battery optimization exemption at startup...');
+    final batteryPermission = await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    debugPrint('   Battery optimization: $batteryPermission');
+  } catch (e) {
+    debugPrint('Battery optimization request error: $e');
   }
 
   runApp(

@@ -5,29 +5,18 @@ import 'package:geolocator/geolocator.dart' as geo;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
-import 'package:dio/dio.dart';
-import 'package:drift/drift.dart' hide JsonKey;
 import '../../data/models/position.dart';
-import '../../data/models/position_upload.dart';
 import '../../core/utils/tracking_handler.dart';
-import '../../core/database/database.dart';
-import '../../core/api/api_client.dart';
 
 part 'tracking_event.dart';
 part 'tracking_state.dart';
 part 'tracking_bloc.freezed.dart';
 
 class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindingObserver {
-  StreamSubscription<geo.Position>? _uiPositionSubscription;
   bool _isServiceEnabled = false;
   
-  // For UI tracking - replicate background service logic
-  AppDatabase? _db;
-  ApiClient? _apiClient;
-  SharedPreferences? _prefs;
-  geo.Position? _lastPosition;
-  DateTime? _lastDeviceInfoSync;
-  Timer? _syncTimer;
+  // UI position subscription - only for UI updates, not for saving/syncing
+  StreamSubscription<geo.Position>? _uiPositionSubscription;
 
   TrackingBloc() : super(const TrackingState.initial()) {
     on<TrackingStart>(_onStart);
@@ -93,8 +82,11 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
       emit(const TrackingState.loading());
       _isServiceEnabled = true;
       
-      // Always start with UI tracking when app is open
-      // Background service will only be used when app goes to background
+      // Always start background service for tracking
+      await _startService();
+      FlutterForegroundTask.addTaskDataCallback(_onTaskData);
+      
+      // Also start UI tracking for real-time UI updates
       await _startUiTracking();
     } catch (e) {
       debugPrint('Error in _onStart: $e');
@@ -127,13 +119,9 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
     debugPrint('   Tracking enabled: $_isServiceEnabled');
     
     if (_isServiceEnabled) {
-      debugPrint('   ✓ Stopping background service...');
-      await _stopService();
-      debugPrint('   ✓ Removing task data callback...');
-      FlutterForegroundTask.removeTaskDataCallback(_onTaskData);
-      debugPrint('   ✓ Starting UI tracking...');
+      debugPrint('   ✓ Starting UI tracking for real-time updates...');
       await _startUiTracking();
-      debugPrint('   ✅ UI tracking started successfully');
+      debugPrint('   ✅ UI tracking started');
     } else {
       debugPrint('   ⚠ Tracking not enabled, skipping');
     }
@@ -146,11 +134,7 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
     if (_isServiceEnabled) {
       debugPrint('   ✓ Stopping UI tracking...');
       await _stopUiTracking();
-      debugPrint('   ✓ Starting background service...');
-      await _startService();
-      debugPrint('   ✓ Adding task data callback...');
-      FlutterForegroundTask.addTaskDataCallback(_onTaskData);
-      debugPrint('   ✅ Background service started successfully');
+      debugPrint('   ⚠ Background service continues running');
     } else {
       debugPrint('   ⚠ Tracking not enabled, skipping');
     }
@@ -159,39 +143,18 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
   Future<void> _startUiTracking() async {
     await _stopUiTracking();
     
-    // Initialize database and API client for UI tracking
-    _db = AppDatabase();
-    _prefs = await SharedPreferences.getInstance();
-    
-    final dio = Dio(BaseOptions(
-      baseUrl: 'https://fleet-move-tracker.vercel.app/api',
-      connectTimeout: const Duration(seconds: 10),
-      receiveTimeout: const Duration(seconds: 10),
-    ));
-    
-    // Add auth interceptor
-    dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) async {
-        final deviceId = _prefs?.getString('device_id');
-        final secretKey = _prefs?.getString('secret_key');
-        if (deviceId != null && secretKey != null) {
-          options.headers['X-DEVICE-ID'] = deviceId;
-          options.headers['X-DEVICE-KEY'] = secretKey;
-        }
-        handler.next(options);
-      },
-    ));
-    _apiClient = ApiClient(dio);
+    debugPrint('   📡 Starting UI position stream...');
     
     const locationSettings = geo.LocationSettings(
       accuracy: geo.LocationAccuracy.high,
       distanceFilter: 5,
     );
 
+    // UI tracking only updates the UI state - all saving/syncing done by background service
     _uiPositionSubscription = geo.Geolocator.getPositionStream(
       locationSettings: locationSettings,
-    ).listen((pos) async {
-      // Update UI state
+    ).listen((pos) {
+      // Update UI state only
       final position = Position(
         latitude: pos.latitude,
         longitude: pos.longitude,
@@ -203,119 +166,15 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
         isSynced: false,
       );
       add(TrackingPositionUpdated(position));
-      
-      // Save to database if enough distance moved
-      if (_shouldSave(pos)) {
-        await _processPosition(pos);
-        _lastPosition = pos;
-      }
     });
     
-    // Start periodic sync timer (every 30 seconds)
-    _syncTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
-      await _syncPendingPositions();
-      
-      // Sync device info every 5 minutes
-      if (_shouldSyncDeviceInfo()) {
-        await _syncDeviceInfo();
-      }
-    });
-    
-    debugPrint('UI-thread tracking started with full processing');
+    debugPrint('   ✅ UI tracking started (display only)');
   }
   
-  bool _shouldSave(geo.Position current) {
-    if (_lastPosition == null) return true;
-    final distance = geo.Geolocator.distanceBetween(
-      _lastPosition!.latitude,
-      _lastPosition!.longitude,
-      current.latitude,
-      current.longitude,
-    );
-    return distance >= 10; // Save every 10 meters
-  }
-  
-  bool _shouldSyncDeviceInfo() {
-    if (_lastDeviceInfoSync == null) return true;
-    return DateTime.now().difference(_lastDeviceInfoSync!) > const Duration(minutes: 5);
-  }
-  
-  Future<void> _processPosition(geo.Position pos) async {
-    if (_db == null) return;
-    
-    final status = pos.speed > 0.5 ? 'moving' : 'stopped';
-    final entry = LocalPositionsCompanion.insert(
-      latitude: pos.latitude,
-      longitude: pos.longitude,
-      speed: Value(pos.speed),
-      heading: Value(pos.heading),
-      altitude: Value(pos.altitude),
-      recordedAt: DateTime.now(),
-      status: Value(status),
-    );
-
-    await _db!.into(_db!.localPositions).insert(entry);
-  }
-  
-  Future<void> _syncPendingPositions() async {
-    if (_db == null || _apiClient == null) return;
-    
-    try {
-      final pending = await (_db!.select(_db!.localPositions)
-            ..where((t) => t.isSynced.equals(false))
-            ..orderBy([(t) => OrderingTerm.asc(t.recordedAt)])
-            ..limit(10))
-          .get();
-
-      if (pending.isEmpty) return;
-      
-      final batchData = pending.map((pos) => PositionUpload(
-        latitude: pos.latitude,
-        longitude: pos.longitude,
-        speed: pos.speed,
-        heading: pos.heading,
-        altitude: pos.altitude,
-        status: pos.status,
-        recordedAt: pos.recordedAt.toIso8601String(),
-      )).toList();
-
-      await _apiClient!.sendPositions(batchData);
-
-      for (var pos in pending) {
-        await (_db!.delete(_db!.localPositions)..where((t) => t.id.equals(pos.id))).go();
-      }
-      
-      debugPrint('UI tracking: Synced ${pending.length} positions');
-    } catch (e) {
-      debugPrint('UI tracking sync error: $e');
-    }
-  }
-  
-  Future<void> _syncDeviceInfo() async {
-    if (_apiClient == null || _prefs == null) return;
-    
-    try {
-      final info = await _apiClient!.getDeviceInfo();
-      if (info.deviceName.isNotEmpty) {
-        await _prefs!.setString('device_name', info.deviceName);
-      }
-      _lastDeviceInfoSync = DateTime.now();
-    } catch (e) {
-      debugPrint('Device info sync error: $e');
-    }
-  }
-
   Future<void> _stopUiTracking() async {
-    _syncTimer?.cancel();
-    _syncTimer = null;
     await _uiPositionSubscription?.cancel();
     _uiPositionSubscription = null;
-    await _db?.close();
-    _db = null;
-    _apiClient = null;
-    _prefs = null;
-    _lastPosition = null;
-    debugPrint('UI-thread tracking stopped');
+    debugPrint('   ✓ UI tracking stopped');
   }
 
   void _onTaskData(Object data) {
@@ -339,16 +198,21 @@ class TrackingBloc extends Bloc<TrackingEvent, TrackingState> with WidgetsBindin
     try {
       debugPrint('🚀 Starting foreground service...');
       
-      // Request notification permission for Android 13+ FIRST
-      debugPrint('   📱 Requesting notification permission...');
-      final notifPermission = await FlutterForegroundTask.requestNotificationPermission();
-      debugPrint('   Notification permission: $notifPermission');
-
-      // Request battery optimization exemption for uninterrupted tracking
-      debugPrint('   🔋 Requesting battery optimization exemption...');
-      final batteryPermission = await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-      debugPrint('   Battery optimization: $batteryPermission');
-
+      // Verify location permissions are granted (required for FOREGROUND_SERVICE_LOCATION on Android 14+)
+      debugPrint('   📍 Verifying location permissions...');
+      final locationPermission = await geo.Geolocator.checkPermission();
+      if (locationPermission == geo.LocationPermission.denied || 
+          locationPermission == geo.LocationPermission.deniedForever) {
+        debugPrint('   ❌ Location permission not granted. Requesting...');
+        final requested = await geo.Geolocator.requestPermission();
+        if (requested == geo.LocationPermission.denied || 
+            requested == geo.LocationPermission.deniedForever) {
+          debugPrint('   ❌ Location permission denied. Cannot start foreground service.');
+          throw Exception('Location permission required for background tracking');
+        }
+      }
+      debugPrint('   ✓ Location permissions verified');
+      
       // NOW initialize foreground task AFTER permissions are granted
       debugPrint('   ⚙️ Initializing foreground task...');
       FlutterForegroundTask.init(

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 
-class FleetMap extends StatelessWidget {
+class FleetMap extends StatefulWidget {
   final LatLng? center;
   final LatLng? destination;
   final List<LatLng>? route;
@@ -20,14 +20,40 @@ class FleetMap extends StatelessWidget {
   });
 
   @override
+  State<FleetMap> createState() => _FleetMapState();
+}
+
+class _FleetMapState extends State<FleetMap> {
+  @override
+  void didUpdateWidget(FleetMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    
+    // Move map if:
+    // 1. Navigation is locked (follow mode)
+    // 2. This is the first time we get a valid center (initial localtion fix)
+    bool shouldMove = widget.center != null && widget.center != oldWidget.center;
+    bool isFirstFix = oldWidget.center == null && widget.center != null;
+    
+    if (shouldMove && (widget.isNavigationLocked || isFirstFix)) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          widget.mapController?.move(
+            widget.center!, 
+            widget.mapController!.camera.zoom,
+          );
+        }
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final subdomains = isDark ? const ['a', 'b', 'c'] : const ['a', 'b', 'c'];
-
     Widget map = FlutterMap(
-      mapController: mapController,
+      mapController: widget.mapController,
       options: MapOptions(
-        initialCenter: center ?? const LatLng(48.8566, 2.3522), // Default Paris
+        initialCenter: widget.center ?? const LatLng(48.8566, 2.3522), // Default Paris
         initialZoom: 15,
         // Allow rotation now that we have a compass
       ),
@@ -53,11 +79,11 @@ class FleetMap extends StatelessWidget {
           userAgentPackageName: 'ts.mila.fleet_tracker',
           tileProvider: NetworkTileProvider(),
         ),
-        if (route != null && route!.isNotEmpty)
+        if (widget.route != null && widget.route!.isNotEmpty)
           PolylineLayer(
             polylines: [
               Polyline(
-                points: route!,
+                points: widget.route!,
                 color: Colors.blue,
                 strokeWidth: 8.0,
               ),
@@ -65,9 +91,9 @@ class FleetMap extends StatelessWidget {
           ),
         MarkerLayer(
           markers: [
-            if (center != null)
+            if (widget.center != null)
               Marker(
-                point: center!,
+                point: widget.center!,
                 width: 40,
                 height: 40,
                 child: Container(
@@ -88,9 +114,9 @@ class FleetMap extends StatelessWidget {
                   ),
                 ),
               ),
-            if (destination != null)
+            if (widget.destination != null)
               Marker(
-                point: destination!,
+                point: widget.destination!,
                 width: 40,
                 height: 40,
                 child: const Icon(
@@ -107,7 +133,7 @@ class FleetMap extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       tween: Tween<double>(
         begin: 0,
-        end: isNavigationLocked ? - 0.7 : 0,
+        end: widget.isNavigationLocked ? - 0.7 : 0,
       ),
       duration: const Duration(milliseconds: 600),
       curve: Curves.easeInOutCubic,
