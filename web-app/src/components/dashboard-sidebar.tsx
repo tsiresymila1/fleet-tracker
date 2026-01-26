@@ -81,7 +81,7 @@ export function DashboardSidebar() {
   };
 
   return (
-    <Sidebar variant="inset" className="border-r dark:border-zinc-900 dark:bg-zinc-950">
+    <Sidebar variant="inset" className="border-r dark:border-zinc-900 dark:bg-zinc-950 p-0!">
       <SidebarHeader className="flex items-center justify-center py-10 border-b border-zinc-100/5 mx-4">
         <div className="flex items-center gap-3">
           <div className="bg-primary p-2.5 rounded-xl shadow-lg shadow-primary/20">

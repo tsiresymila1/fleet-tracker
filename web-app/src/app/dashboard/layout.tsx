@@ -75,7 +75,7 @@ export default function DashboardLayout({
   return (
     <SidebarProvider>
       <DashboardSidebar />
-      <SidebarInset className="bg-background flex flex-col">
+      <SidebarInset className="bg-red flex flex-col md:peer-data-[variant=inset]:m-0!">
         <header className="flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border bg-background px-6 sticky top-0 z-50 transition-[width,height] ease-linear">
             <div className="flex items-center gap-2">
                 <SidebarTrigger className="hover:bg-zinc-900 transition-colors" />

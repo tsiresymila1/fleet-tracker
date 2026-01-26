@@ -1,20 +1,29 @@
 "use client";
 
-import { useEffect, useState } from 'react';
+import dynamic from 'next/dynamic';
+
+const IntegrationRelay = dynamic(() => import('@/components/integration-relay').then(mod => mod.IntegrationRelay), { 
+  ssr: false,
+  loading: () => (
+    <div className="h-[200px] w-full bg-muted animate-pulse rounded-xl border border-border flex items-center justify-center">
+      <div className="text-[10px] text-muted-foreground uppercase tracking-widest italic">Initializing Uplink...</div>
+    </div>
+  )
+});
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { createClient } from '@/utils/supabase/client';
 import {
-  Truck,
-  MapPin,
   Activity,
   AlertTriangle,
   Clock,
-  Navigation
+  MapPin,
+  Navigation,
+  Truck
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import Link from 'next/link';
-import { IntegrationRelay } from '@/components/integration-relay';
 import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
 interface ActivityItem {
   id: string;
@@ -50,30 +59,6 @@ export default function DashboardClient({
   const [recentActivity, setRecentActivity] = useState(initialActivity);
   const [systemStatus, setSystemStatus] = useState('OPTIMAL');
 
-  useEffect(() => {
-    // Subscribe to position updates
-    const positionsSubscription = supabase
-      .channel('positions')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'positions'
-        },
-        () => {
-          // Update system status on new data
-          setSystemStatus('OPTIMAL');
-          // Refresh stats
-          refreshStats();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(positionsSubscription);
-    };
-  }, [supabase]);
 
   const refreshStats = async () => {
     try {
@@ -130,6 +115,32 @@ export default function DashboardClient({
       bg: "bg-orange-500/10"
     },
   ];
+
+
+  useEffect(() => {
+    // Subscribe to position updates
+    const positionsSubscription = supabase
+      .channel('positions')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'positions'
+        },
+        () => {
+          // Update system status on new data
+          setSystemStatus('OPTIMAL');
+          // Refresh stats
+          refreshStats();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(positionsSubscription);
+    };
+  }, [supabase]);
 
   return (
     <div className="space-y-8 pb-20">
